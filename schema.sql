@@ -27,12 +27,11 @@ CREATE TABLE checkedOut (
     userID varchar(50) references users(userID),
     isbn int references book(isbn),
     isOverdue boolean,
-    returnDate date,
-    dueDate DATE DEFAULT CURRENT_DATE + INTERVAL '30 days',
-    borrowDate DATE DEFAULT CURRENT_DATE
+    returnDate DATE,
+    dueDate DATE,
+    borrowDate DATE
 );
 
--- not too sure if this should be its own table or somehow merged into an existing one
 CREATE TABLE status (
     userID varchar(50) references users(userID),
     isbn int references book(isbn),
