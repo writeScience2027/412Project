@@ -31,37 +31,41 @@ Start PostgreSQL
 
 If running locally:
 
-export PATH="/opt/homebrew/opt/postgresql@15/bin:${PATH}"
-export PGPORT=8888
-export PGHOST=/tmp
-pg_ctl -D $HOME/db412 -o '-k /tmp' start
+``export PATH="/opt/homebrew/opt/postgresql@15/bin:${PATH}"``
+
+``export PGPORT=8888``
+
+``export PGHOST=/tmp``
+
+``pg_ctl -D $HOME/db412 -o '-k /tmp' start``
 
 ### Create a New Database
 
 Only do this once:
 
-createdb CSE412Project
+``createdb CSE412Project``
 
 ### Connect to the Database
-psql -d CSE412Project
+``psql -d CSE412Project``
 
-5️### Run the Schema and Data Scripts
+### Run the Schema and Data Scripts
 
 Inside the PostgreSQL console:
 
-\i schema.sql
-\i data.sql
+``\i schema.sql``
+
+``\i data.sql``
 
 
 You can verify successful setup by listing tables:
 
-\dt
+``\dt``
 
 ### Run Queries
 
 To demonstrate functionality, run:
 
-\i queries.sql
+``\i queries.sql``
 
 Example queries include:
 
