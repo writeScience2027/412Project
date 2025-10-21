@@ -1,7 +1,7 @@
 # CSE 412 Database Project
 
 ## Overview
-This project implements a simplified **Library Management System** using **PostgreSQL**, demonstrating the core phases of relational database design:
+This project implements a **Library Management System** using **PostgreSQL**, demonstrating the core phases of relational database design:
 1. **ER-to-Relational Mapping** (`schema.sql`)
 2. **Data Population** (`data.sql`)
 3. **Query Demonstration** (`queries.sql`)
