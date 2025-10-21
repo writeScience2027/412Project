@@ -27,7 +27,7 @@ Together, they form a fully functional database that models a library’s users,
 
 ``cd <your-repo-name>``
 
-###Start PostgreSQL
+### Start PostgreSQL
 
 If running locally:
 
