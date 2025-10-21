@@ -23,13 +23,13 @@ Together, they form a fully functional database that models a library’s users,
 ## Setup Instructions
 
 ### Clone the Repository
-``bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>``
+``git clone https://github.com/<your-username>/<your-repo-name>.git``
+
+``cd <your-repo-name>``
 
 Start PostgreSQL
 
-If running locally (e.g., through VS Code):
+If running locally:
 
 export PATH="/opt/homebrew/opt/postgresql@15/bin:${PATH}"
 export PGPORT=8888
