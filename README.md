@@ -23,9 +23,9 @@ Together, they form a fully functional database that models a library’s users,
 ## Setup Instructions
 
 ### Clone the Repository
-``bash``
+``bash
 git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+cd <your-repo-name>``
 
 Start PostgreSQL
 
