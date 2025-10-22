@@ -43,11 +43,6 @@ SELECT st.userID,
     JOIN book bk ON st.isbn = bk.isbn
   WHERE st.userID = 'l_morgan';
 
-SELECT * from status;
-
-select * from book;
-
-
 -- add queries about librarians:
   -- add a book as a librarian
 INSERT INTO book (isbn, title, author, genre, audienceAge, releaseYear, totalQuantity, numAvailable) VALUES
