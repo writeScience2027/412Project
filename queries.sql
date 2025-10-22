@@ -46,19 +46,20 @@ SELECT st.userID,
 -- add queries about librarians:
   -- add a book as a librarian
 INSERT INTO book (isbn, title, author, genre, audienceAge, releaseYear, totalQuantity, numAvailable) VALUES
-  (120000021, 'Percy Jackson and the Lightning Thief', 'Rick Riordan', 'Fantasy', 12, 2005, 5, 5);
+  (123000321, 'Percy Jackson and the Lightning Thief', 'Rick Riordan', 'Fantasy', 12, 2005, 5, 5);
 
 INSERT INTO status (userID, isbn, added, removed) VALUES
-  ('l_morgan', 120000021, '2025-10-17', '2025-10-20');
+  ('l_morgan', 123000321, '2025-10-17', NULL);
 
   -- remove book as a specific librarian
 UPDATE status SET removed = '2025-10-23'
-WHERE userID = 'l_morgan' AND  isbn = 120000021;
+WHERE userID = 'l_morgan' AND  isbn = 123000321;
 
   --delete book as a specific librarian
-DELETE FROM book where isbn = 120000021;
-DELETE FROM status WHERE isbn = 120000021;
+DELETE FROM book where isbn = 123000321;
+DELETE FROM status WHERE isbn = 123000321;
 
 -- update a record when a reader returns a book
 UPDATE checkedOut SET returnDate = CURRENT_DATE
 WHERE userID = 'r_alex' AND  isbn = 100000001;
+
