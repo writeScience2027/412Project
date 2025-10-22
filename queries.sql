@@ -1,4 +1,6 @@
---QUERIES
+-- need INSERT, DELETE, UPDATE, and SELECTION QUERIES
+
+
 -- list all the checked out books and who borrowed them
 SELECT * 
   FROM checkedOut;
@@ -36,22 +38,31 @@ SELECT chout.userID,
 -- what books did one librarian add
 SELECT st.userID,
   bk.title,
-  st.added as "data_added"
+  st.added as "added_on", st.removed as "removed_on"
   FROM status st
     JOIN book bk ON st.isbn = bk.isbn
   WHERE st.userID = 'l_morgan';
 
+SELECT * from status;
+
+select * from book;
+
+
 -- add queries about librarians:
   -- add a book as a librarian
 INSERT INTO book (isbn, title, author, genre, audienceAge, releaseYear, totalQuantity, numAvailable) VALUES
-  (900000901, 'Percy Jackson and the Lightning Thief', 'Rick Riordan', 'Fantasy', 12, 2005, 5, 5);
+  (120000021, 'Percy Jackson and the Lightning Thief', 'Rick Riordan', 'Fantasy', 12, 2005, 5, 5);
 
 INSERT INTO status (userID, isbn, added, removed) VALUES
-  ('l_morgan', 900000901, '2025-10-17', NULL);
+  ('l_morgan', 120000021, '2025-10-17', '2025-10-20');
 
   -- remove book as a specific librarian
-UPDATE status SET removed = 2025-10-23
-WHERE userID = 'l_morgan' AND  isbn = 900000901;
+UPDATE status SET removed = '2025-10-23'
+WHERE userID = 'l_morgan' AND  isbn = 120000021;
+
+  --delete book as a specific librarian
+DELETE FROM book where isbn = 120000021;
+DELETE FROM status WHERE isbn = 120000021;
 
 -- update a record when a reader returns a book
 UPDATE checkedOut SET returnDate = CURRENT_DATE
