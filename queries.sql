@@ -56,8 +56,9 @@ UPDATE status SET removed = '2025-10-23'
 WHERE userID = 'l_morgan' AND  isbn = 123000321;
 
   --delete book as a specific librarian
-DELETE FROM book where isbn = 123000321;
 DELETE FROM status WHERE isbn = 123000321;
+DELETE FROM book   WHERE isbn = 123000321;
+
 
 -- update a record when a reader returns a book
 UPDATE checkedOut SET returnDate = CURRENT_DATE
