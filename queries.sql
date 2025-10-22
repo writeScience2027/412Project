@@ -18,7 +18,7 @@ SELECT checkedout.userID as name,
   checkedOut.isOverdue
   FROM checkedOut 
     JOIN book ON checkedOut.isbn = book.isbn
-  WHERE userID = 'r_alex';
+  WHERE checkedOut.userID = 'r_alex';
 
 -- view all the books from one author and how many are available
 SELECT author, title, numAvailable
