@@ -7,13 +7,36 @@
 
 }
 body{
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    
     min-height: 100vh;
     background: #cadffc;
 
 }
+.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background-color: #100e4d;
+    padding: 15px 0;
+    position: sticky; /* sticks to top */
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(253, 253, 253, 2.5);
+}
+
+.navbar-text {
+    color: #fff;
+    padding: 10px 20px;
+    font-weight: 500;
+    font-size: 18px;
+}
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 70px); /* leave space for navbar */
+}
+
 .login-box{
     display: flex;
     justify-content: center;
@@ -121,3 +144,4 @@ section a{
     font-weight: 600;
 
 }
+
