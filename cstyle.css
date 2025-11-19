@@ -1,0 +1,81 @@
+@import url(https://https://fonts.google.com/specimen/Lora.google.com/specimen/Playfair+Display/license);
+*{
+    background-color: #cadffc;
+    margin: 0; 
+    padding: 0;
+    box-sizing : border-box;
+    font-family: 'Lora', 'Times New Roman';
+}
+
+.navbar, .find{
+    background-color: #100e4d;
+
+    display: flex;
+
+    top: 0 50px 50px 0;
+    position: sticky;
+    justify-content: center;
+    
+    font-size: 20px;
+    font-weight: 600;
+    font-family: 'Lora', 'Times New Roman';
+}
+.navbar a, .find a{
+    background-color: #100e4d;
+
+    float:left;
+    padding: 14px;
+
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+}
+.navbar a:hover, .find a:hover{
+    background-color: #9ec0d5;;
+    color: #100e4d; 
+}
+.navbar a.active, .find a.active{
+    cursor: pointer;
+}
+
+.logout {
+    background-color: #100e4d;
+
+    margin-left: auto;
+
+    color:#fff;
+    text-decoration: none;
+    text-align: center;
+}
+
+.title {
+    text-align: center;
+    font-size: 30px;
+}
+
+.searchbar {
+    display: flex;
+
+    height: 40px;
+    justify-content: center;
+
+    text-align: center;
+}
+.searchbar input[type=text]{
+    background-color: #ffffff;
+
+    width: 750px;
+    justify-content: center;
+
+    font-size: 20px;
+    font-weight: 600;
+    font-family: 'Lora', 'Times New Roman';
+}
+
+.bookbox{
+    text-align: center;
+    font-size: 30px;
+}
+table,th,td{
+    border: 1px solid black;
+}
