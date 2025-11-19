@@ -1,6 +1,6 @@
 @import url(https://https://fonts.google.com/specimen/Lora.google.com/specimen/Playfair+Display/license);
 *{
-    background-color: #cadffc;
+    background-color: #d3bbf3;
     margin: 0; 
     padding: 0;
     box-sizing : border-box;
@@ -11,7 +11,7 @@
     background-color: #100e4d;
 
     display: flex;
-    box-shadow: 0 4px 6px rgba(255, 255, 255, 1.2);
+    
     top: 0 50px 50px 0;
     position: sticky;
     justify-content: center;
@@ -20,7 +20,7 @@
     font-weight: 500;
     font-family: 'Lora', 'Times New Roman';
 }
-.navbar a, .find a, .checkout a{
+.navbar a, .find a, .checkout a, .catalogEdit a{
     background-color: #100e4d;
 
     float:left;
@@ -30,20 +30,32 @@
     text-decoration: none;
     text-align: center;
 }
-.navbar a:hover, .find a:hover, .checkout a:hover{
-   
-    background-color: #e2edfd;;
+.navbar a:hover, .find a:hover, .checkout a:hover, .catalogEdit a:hover{
+    background-color: #ac8cd6;
     color: #100e4d; 
 }
 .navbar a.active, .find a.active, .checkout a.active{
     cursor: pointer;
 }
 
-.checkout {
+
+.checkout, .catalogEdit {
     display: flex;
     margin-top: 20px;
     justify-content: center;
     text-align: center;
+}
+
+.add{
+    display: flex;
+    justify-content: center;
+    margin: auto auto auto 10px;
+}
+
+.rem{
+    display: flex;
+    justify-content: center;
+    margin: auto auto auto 10px;
 }
 
 .logout {
@@ -92,27 +104,26 @@
 
 th{
     background-color:#1c1c25;
-    color:#cadffc;
+    color:#fff;
     padding: 15px;
     border: 5px solid #8d8d93;
 }
 table,td{
-    background-color:#e7f0fd;
+    background-color:#fff;
     padding: 15px;
     border: 5px solid #1c1c25;
     border-collapse: collapse;
-    
+    margin: 10px;
 }
 .reader-info{
     background-color: #100e4d;
     justify-content: center;
-    padding: 15px;
+    padding: 20px;
     margin: 30px auto;
-    width: 35%;
-    font-size: 25px;
+    width: 50%;
+    font-size: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(251, 251, 251, 5);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
     font-family: 'Lora', 'Times New Roman';
     text-align: center;
-    
 }
