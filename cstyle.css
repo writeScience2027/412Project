@@ -11,7 +11,7 @@
     background-color: #100e4d;
 
     display: flex;
-
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 1.2);
     top: 0 50px 50px 0;
     position: sticky;
     justify-content: center;
