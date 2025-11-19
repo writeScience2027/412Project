@@ -99,3 +99,16 @@ table,td{
     border: 5px solid #8d8d93;
     border-collapse: collapse;
 }
+.reader-info{
+    background-color: #100e4d;
+    justify-content: center;
+    padding: 20px;
+    margin: 30px auto;
+    width: 50%;
+    font-size: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    font-family: 'Lora', 'Times New Roman';
+    text-align: center;
+    
+}
