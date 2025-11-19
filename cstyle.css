@@ -31,6 +31,7 @@
     text-align: center;
 }
 .navbar a:hover, .find a:hover, .checkout a:hover{
+    border-radius: 20px;
     background-color: #9ec0d5;;
     color: #100e4d; 
 }
