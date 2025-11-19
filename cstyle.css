@@ -102,10 +102,6 @@ table,td{
     border-collapse: collapse;
     
 }
-.bookbox table tbody tr:hover td {
-    background-color: #100e4d; 
-    color: #cadffc;
-}
 .reader-info{
     background-color: #100e4d;
     justify-content: center;
