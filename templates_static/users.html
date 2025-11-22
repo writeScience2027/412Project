@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="cstyle.css">
+    <link rel="stylesheet" href="/cstyle.css">
     <title>Users</title>
 </head>
 <body>
     <div class="navbar">
-        <a href="cataloglibrarian.html">Home</a>
-        <a href="librarian_profile.html">Profile</a>
-        <a href="librarian_view.html">Book Catalog</a>
-        <a href="users.html">Users</a>
-        <a class="logout" href="index.html">Logout</a>
+        <a href="/cataloglibrarian">Home</a>
+        <a href="/librarian_profile">Profile</a>
+        <a href="/librarian_view">Book Catalog</a>
+        <a href="/users">Users</a>
+        <a class="logout" href="/">Logout</a>
     </div>
     
     <div class="title">
@@ -20,10 +20,10 @@
     </div>
 
     <div class="searchbar">
-        <input type="text" placeholder="    Find user">
-        <div class="find">
-            <a href="#">Find</a>
-        </div>
+        <form action="/users" method="get" style="display: flex; justify-content: center;">
+            <input type="text" name="q" placeholder="Find user" style="width: 750px;">
+            <button type="submit" style="background-color: #100e4d; color: white; border: none; padding: 14px; cursor: pointer;">Find</button>
+        </form>
     </div>
 
     <div class="bookbox">
@@ -37,16 +37,6 @@
                 <th>Date Due</th>
                 <th>Overdue</th>
                 <th>Return Date</th>
-            </tr>
-            <tr>
-                <td>1000001</td>
-                <td>Harry Potter and The Goblet of Fire</td>
-                <td>J.K. Rowling</td>
-                <td>1234</td>
-                <td>11-22-2025</td>
-                <td>12-06-2025</td>
-                <td>No</td>
-                <td>N/A</td>
             </tr>
         </table>
     </div>
