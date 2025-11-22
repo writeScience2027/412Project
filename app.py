@@ -204,6 +204,71 @@ def catalog():
     new_html = inject_rows_into_table(base_html, rows_html, table_index=0)
     return Response(new_html, mimetype="text/html")
 
+@app.route("/checkout_books", methods=["POST"])
+def checkout_books():
+    """Checkout selected books for a reader."""
+    user = session.get("userID")
+    if not user or session.get('role') != 'reader':
+        flash("Must be logged in as a reader to checkout books", "warning")
+        return redirect(url_for('catalog'))
+    
+    selected_isbns = request.form.getlist("selected_isbn")
+    
+    if not selected_isbns:
+        flash("No books selected for checkout", "warning")
+        return redirect(url_for('catalog'))
+    
+    conn = get_db_conn()
+    cur = conn.cursor()
+    success_count = 0
+    error_books = []
+    
+    try:
+        for isbn in selected_isbns:
+            try:
+                cur.execute("SELECT numAvailable, title FROM book WHERE isbn = %s", (isbn,))
+                result = cur.fetchone()
+                
+                if result and result[0] > 0:
+                    cur.execute("""
+                        INSERT INTO checkedOut (userID, isbn, borrowDate, dueDate, returnDate, isOverdue)
+                        VALUES (%s, %s, CURRENT_DATE, (CURRENT_DATE + INTERVAL '30 days')::date, NULL, FALSE)
+                    """, (user, isbn))
+                    
+                    cur.execute("""
+                        UPDATE book 
+                        SET numAvailable = GREATEST(numAvailable - 1, 0) 
+                        WHERE isbn = %s
+                    """, (isbn,))
+                    
+                    cur.execute("""
+                        UPDATE reader 
+                        SET numBooksCheckedOut = numBooksCheckedOut + 1 
+                        WHERE userID = %s
+                    """, (user,))
+                    
+                    success_count += 1
+                else:
+                    error_books.append(result[1] if result else f"ISBN {isbn}")
+            except Exception as e:
+                error_books.append(f"ISBN {isbn}")
+        
+        conn.commit()
+        
+        if success_count > 0:
+            flash(f"Successfully checked out {success_count} book(s)!", "success")
+        if error_books:
+            flash(f"Could not checkout: {', '.join(error_books)}", "warning")
+            
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error during checkout: {str(e)}", "danger")
+    finally:
+        cur.close()
+        conn.close()
+    
+    return redirect(url_for('catalog'))
+
 
 @app.route("/cataloglibrarian")
 def cataloglibrarian():
