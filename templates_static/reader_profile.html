@@ -14,7 +14,7 @@
     </div>
     
     <div class="title">
-        <h1>Profile</h1>
+        <h1>My Profile</h1>
     </div>
 
     <div class="reader-info">
@@ -25,17 +25,21 @@
     </div>
 
     <div class="bookbox">
-        <table>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>ISBN</th>
-                <th>Date Checked Out</th>
-                <th>Date Due</th>
-                <th>Overdue</th>
-                <th>Return Date</th>
-            </tr>
-        </table>
+        <h3 style="text-align: center;">My Checked Out Books</h3>
+        <form action="/return_books" method="POST">
+            <table>
+                <tr>
+                    <th>Select</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>ISBN</th>
+                    <th>Date Checked Out</th>
+                    <th>Date Due</th>
+                    <th>Overdue</th>
+                </tr>
+            </table>
+            <button type="submit" style="margin-top: 20px; padding: 12px 30px; background-color: #100e4d; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">Return Selected Books</button>
+        </form>
     </div>
 
 </body>
