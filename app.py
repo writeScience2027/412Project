@@ -35,6 +35,7 @@ def read_static_html(filename):
         return fh.read()
 
 def inject_rows_into_table(html, rows_html, table_index=0):
+    """Inject rows after the header row of the specified table."""
     table_pattern = re.compile(r"(<table.*?>)(.*?)(</table>)", re.IGNORECASE | re.DOTALL)
     matches = list(table_pattern.finditer(html))
     if not matches or table_index >= len(matches):
@@ -51,6 +52,7 @@ def inject_rows_into_table(html, rows_html, table_index=0):
     return new_html
 
 def render_catalog_rows(book_rows, reader_mode=True):
+    """Generate table rows matching frontend column structure."""
     out = []
     for b in book_rows:
         isbn = b.get("isbn")
@@ -63,51 +65,51 @@ def render_catalog_rows(book_rows, reader_mode=True):
         if numavailable is None:
             numavailable = b.get("numAvailable", "")
         totalq = b.get("totalquantity") if b.get("totalquantity") is not None else b.get("totalQuantity", "")
+        
         if reader_mode:
-            checkout_href = f"{url_for('catalog')}?checkout={isbn}"
             tr = (
                 f"<tr>"
                 f"<td>{title}</td><td>{author}</td><td>{isbn}</td><td>{genre}</td>"
                 f"<td>{audience}</td><td>{year}</td><td>{numavailable}</td><td>{totalq}</td>"
-                f"<td><a href=\"{checkout_href}\">Checkout</a></td>"
                 f"</tr>"
             )
         else:
-            remove_href = f"{url_for('cataloglibrarian')}?remove={isbn}"
             tr = (
                 f"<tr>"
                 f"<td><input type='checkbox' name='selected_isbn' value='{isbn}'></td>"
                 f"<td>{title}</td><td>{author}</td><td>{isbn}</td><td>{genre}</td>"
                 f"<td>{audience}</td><td>{year}</td><td>{numavailable}</td><td>{totalq}</td>"
-                f"<td><a href=\"{remove_href}\">Remove</a></td>"
                 f"</tr>"
             )
         out.append(tr)
     return "\n".join(out)
 
 def render_loans_rows(loan_rows):
+    """Generate table rows matching reader_profile.html structure (7 columns)."""
     out = []
     for l in loan_rows:
         isbn = l.get("isbn")
         title = l.get("title") or ""
+        author = l.get("author") or ""
         borrowdate = l.get("borrowdate") or l.get("borrowDate") or ""
         duedate = l.get("duedate") or l.get("dueDate") or ""
         isoverdue = l.get("isoverdue") or l.get("isOverdue") or False
         overdue_str = "Yes" if isoverdue else "No"
-        return_href = f"{url_for('return_book')}?isbn={isbn}"
+        returndate = l.get("returndate") or l.get("returnDate") or "N/A"
+        
         tr = (
-            f"<tr><td>{title}</td><td>{borrowdate}</td><td>{duedate}</td>"
-            f"<td>{overdue_str}</td><td><a href=\"{return_href}\">Return</a></td></tr>"
+            f"<tr>"
+            f"<td>{title}</td><td>{author}</td><td>{isbn}</td>"
+            f"<td>{borrowdate}</td><td>{duedate}</td>"
+            f"<td>{overdue_str}</td><td>{returndate}</td>"
+            f"</tr>"
         )
         out.append(tr)
     return "\n".join(out)
 
 @app.route("/setuser/<userid>")
 def set_user(userid):
-    """
-    Quick demo helper to set session user (no password).
-    Use: /setuser/r_alex or /setuser/l_morgan
-    """
+    """Quick demo helper to set session user (no password)."""
     session['userID'] = userid
     conn = get_db_conn()
     cur = conn.cursor()
@@ -126,38 +128,13 @@ def set_user(userid):
 
 @app.route("/")
 def index():
-    return redirect(url_for('catalog'))
+    """Serve the login page."""
+    return send_from_directory(STATIC_HTML_DIR, 'index.html')
 
 @app.route("/catalog")
 def catalog():
-    checkout_isbn = request.args.get("checkout")
+    """Reader catalog page with search functionality."""
     q = request.args.get("q", "").strip()
-
-    if checkout_isbn:
-        user = session.get('userID')
-        if not user:
-            flash("Not logged in. Use /setuser/<id> for demo login or implement login.", "warning")
-            return redirect(url_for('catalog'))
-        conn = get_db_conn()
-        cur = conn.cursor()
-        try:
-            cur.execute("""
-                INSERT INTO checkedOut (userID, isbn, borrowDate, dueDate, isOverdue)
-                VALUES (%s, %s, CURRENT_DATE, (CURRENT_DATE + INTERVAL '30 days')::date, FALSE)
-            """, (user, checkout_isbn))
-            cur.execute("UPDATE book SET numavailable = GREATEST(numavailable - 1, 0) WHERE isbn = %s", (checkout_isbn,))
-            cur.execute("UPDATE reader SET numBooksCheckedOut = numBooksCheckedOut + 1 WHERE userID = %s", (user,))
-            conn.commit()
-            flash("Checked out book " + str(checkout_isbn), "success")
-        except Exception as e:
-            conn.rollback()
-            flash("Checkout failed: " + str(e), "danger")
-        finally:
-            cur.close(); conn.close()
-        base_url = url_for('catalog')
-        if q:
-            return redirect(f"{base_url}?q={q}")
-        return redirect(base_url)
 
     conn = get_db_conn()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -188,27 +165,14 @@ def catalog():
 
 @app.route("/cataloglibrarian")
 def cataloglibrarian():
+    """Librarian catalog page with search functionality."""
     if session.get('role') != 'librarian':
-        flash("You must be a librarian to access this page. Use /setuser/<id> to set a librarian session.", "warning")
+        flash("You must be a librarian to access this page.", "warning")
         return redirect(url_for('catalog'))
 
-    remove_isbn = request.args.get("remove")
-    if remove_isbn:
-        conn = get_db_conn(); cur = conn.cursor()
-        try:
-            cur.execute("DELETE FROM status WHERE isbn = %s", (remove_isbn,))
-            cur.execute("DELETE FROM book WHERE isbn = %s", (remove_isbn,))
-            conn.commit()
-            flash(f"Removed book {remove_isbn}", "success")
-        except Exception as e:
-            conn.rollback()
-            flash("Remove failed: " + str(e), "danger")
-        finally:
-            cur.close(); conn.close()
-        return redirect(url_for('cataloglibrarian'))
-
     q = request.args.get("q", "").strip()
-    conn = get_db_conn(); cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    conn = get_db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         if q:
             wildcard = f"%{q}%"
@@ -234,45 +198,28 @@ def cataloglibrarian():
     return Response(new_html, mimetype="text/html")
 
 
-@app.route("/return")
-def return_book():
-    isbn = request.args.get("isbn")
-    user = session.get("userID")
-    if not user or not isbn:
-        flash("Missing user or isbn for return", "warning")
-        return redirect(url_for('catalog'))
-
-    conn = get_db_conn(); cur = conn.cursor()
-    try:
-        cur.execute("""
-            UPDATE checkedOut
-            SET returnDate = CURRENT_DATE, isOverdue = FALSE
-            WHERE userID = %s AND isbn = %s AND returnDate IS NULL
-        """, (user, isbn))
-        cur.execute("UPDATE book SET numavailable = numavailable + 1 WHERE isbn = %s", (isbn,))
-        cur.execute("UPDATE reader SET numBooksCheckedOut = GREATEST(numBooksCheckedOut - 1, 0) WHERE userID = %s", (user,))
-        conn.commit()
-        flash("Returned book " + str(isbn), "success")
-    except Exception as e:
-        conn.rollback()
-        flash("Return failed: " + str(e), "danger")
-    finally:
-        cur.close(); conn.close()
-
-    return redirect(url_for('catalog'))
-
-
-@app.route("/profile")
-def profile():
+@app.route("/reader_profile")
+def reader_profile():
+    """Reader profile page showing checked out books."""
     user = session.get("userID")
     if not user:
         flash("Not logged in. Use /setuser/<id> for demo login.", "warning")
         return redirect(url_for('catalog'))
 
-    conn = get_db_conn(); cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    conn = get_db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cur.execute("""
-            SELECT b.isbn, b.title, ch.borrowDate AS borrowdate, ch.dueDate AS duedate, ch.returnDate, ch.isOverdue
+            SELECT r.numBooksCheckedOut, u.userID
+            FROM reader r
+            JOIN users u ON r.userID = u.userID
+            WHERE r.userID = %s
+        """, (user,))
+        user_info = cur.fetchone()
+        
+        cur.execute("""
+            SELECT b.isbn, b.title, b.author, ch.borrowDate AS borrowdate, 
+                   ch.dueDate AS duedate, ch.returnDate, ch.isOverdue
             FROM checkedOut ch
             JOIN book b ON ch.isbn = b.isbn
             WHERE ch.userID = %s
@@ -282,41 +229,111 @@ def profile():
     finally:
         cur.close(); conn.close()
 
-    rows_html = render_loans_rows(loans)
     base_html = read_static_html("reader_profile.html")
-    new_html = inject_rows_into_table(base_html, rows_html, table_index=1) 
+    if user_info:
+        base_html = base_html.replace("ex: userId", user_info['userid'])
+        base_html = base_html.replace("ex: 5", str(user_info['numbookscheckedout']))
+    
+    rows_html = render_loans_rows(loans)
+    new_html = inject_rows_into_table(base_html, rows_html, table_index=0)
+    return Response(new_html, mimetype="text/html")
+
+
+@app.route("/librarian_profile")
+def librarian_profile():
+    """Librarian profile page."""
+    if session.get('role') != 'librarian':
+        flash("Must be a librarian", "warning")
+        return redirect(url_for('catalog'))
+    
+    user = session.get("userID")
+    conn = get_db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cur.execute("""
+            SELECT b.isbn, b.title, b.author, 
+                   CURRENT_DATE AS borrowdate, 
+                   CURRENT_DATE AS duedate,
+                   FALSE AS isoverdue,
+                   NULL AS returndate
+            FROM book b
+            LIMIT 10
+        """)
+        books = cur.fetchall()
+    finally:
+        cur.close(); conn.close()
+    
+    base_html = read_static_html("librarian_profile.html")
+    base_html = base_html.replace("ex: userId", user)
+    
+    rows_html = render_loans_rows(books)
+    new_html = inject_rows_into_table(base_html, rows_html, table_index=0)
+    return Response(new_html, mimetype="text/html")
+
+
+@app.route("/librarian_view")
+def librarian_view():
+    """Librarian book catalog management page."""
+    if session.get('role') != 'librarian':
+        flash("Must be a librarian", "warning")
+        return redirect(url_for('catalog'))
+    
+    conn = get_db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cur.execute("""
+            SELECT isbn, title, author, genre, audienceage, releaseyear, numavailable, totalquantity
+            FROM book
+            ORDER BY title
+        """)
+        books = cur.fetchall()
+    finally:
+        cur.close(); conn.close()
+    
+    rows_html = render_catalog_rows(books, reader_mode=False)
+    base_html = read_static_html("librarian_view.html")
+    new_html = inject_rows_into_table(base_html, rows_html, table_index=0)
     return Response(new_html, mimetype="text/html")
 
 
 @app.route("/users")
 def users_page():
+    """Users page for librarians."""
     if session.get('role') != 'librarian':
         flash("Must be a librarian", "warning")
         return redirect(url_for('catalog'))
 
-    conn = get_db_conn(); cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    conn = get_db_conn()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cur.execute("""
-            SELECT u.userID, b.title, ch.isbn, ch.borrowDate AS borrowdate, ch.dueDate AS duedate, ch.returnDate, ch.isOverdue
+            SELECT u.userID, b.title, b.author, ch.isbn, 
+                   ch.borrowDate AS borrowdate, ch.dueDate AS duedate, 
+                   ch.returnDate, ch.isOverdue
             FROM users u
             LEFT JOIN checkedOut ch ON u.userID = ch.userID
             LEFT JOIN book b ON ch.isbn = b.isbn
+            WHERE u.userID LIKE 'r_%'
             ORDER BY u.userID
         """)
-        rows = cur.fetchall()
+        rows_data = cur.fetchall()
     finally:
         cur.close(); conn.close()
 
     out = []
-    for r in rows:
-        userid = r.get("userid") or r.get("userID")
+    for r in rows_data:
+        userid = r.get("userid") or r.get("userID") or ""
         title = r.get("title") or ""
+        author = r.get("author") or ""
         isbn = r.get("isbn") or ""
         borrow = r.get("borrowdate") or ""
         due = r.get("duedate") or ""
         isover = r.get("isoverdue") or False
         overdue_str = "Yes" if isover else "No"
-        tr = f"<tr><td>{userid}</td><td>{title}</td><td>{isbn}</td><td>{borrow}</td><td>{due}</td><td>{overdue_str}</td><td>{r.get('returndate') or ''}</td></tr>"
+        returndate = r.get("returndate") or "N/A"
+        
+        tr = (f"<tr><td>{userid}</td><td>{title}</td><td>{author}</td><td>{isbn}</td>"
+              f"<td>{borrow}</td><td>{due}</td><td>{overdue_str}</td><td>{returndate}</td></tr>")
         out.append(tr)
     rows_html = "\n".join(out)
 
@@ -326,12 +343,18 @@ def users_page():
 
 
 @app.route("/cstyle.css")
-def cstyle_redirect():
-    return redirect(url_for('static', filename='css/cstyle.css'))
+def serve_cstyle():
+    return send_from_directory(os.path.join(app.root_path, 'static', 'css'), 'cstyle.css')
 
 @app.route("/style.css")
-def style_redirect():
-    return redirect(url_for('static', filename='css/style.css'))
+def serve_style():
+    return send_from_directory(os.path.join(app.root_path, 'static', 'css'), 'style.css')
+
+@app.route("/<path:filename>")
+def serve_static_html(filename):
+    if filename.endswith('.html'):
+        return send_from_directory(STATIC_HTML_DIR, filename)
+    return "Not found", 404
 
 
 @app.route("/whoami")
