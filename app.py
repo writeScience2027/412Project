@@ -288,6 +288,89 @@ def librarian_profile():
     
     return Response(base_html, mimetype="text/html")
 
+@app.route("/add_book", methods=["POST"])
+def add_book():
+    """Add a new book to the catalog."""
+    if session.get('role') != 'librarian':
+        flash("Must be a librarian to add books", "warning")
+        return redirect(url_for('catalog'))
+    
+    isbn = request.form.get("isbn")
+    title = request.form.get("title")
+    author = request.form.get("author")
+    genre = request.form.get("genre")
+    audience_age = request.form.get("audienceAge")
+    release_year = request.form.get("releaseYear")
+    total_quantity = request.form.get("totalQuantity")
+    user = session.get("userID")
+    
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        # Insert book
+        cur.execute("""
+            INSERT INTO book (isbn, title, author, genre, audienceAge, releaseYear, totalQuantity, numAvailable)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (isbn, title, author, genre, audience_age, release_year, total_quantity, total_quantity))
+        
+        # Record in status table
+        cur.execute("""
+            INSERT INTO status (userID, isbn, added, removed)
+            VALUES (%s, %s, CURRENT_DATE, NULL)
+        """, (user, isbn))
+        
+        conn.commit()
+        flash(f"Successfully added '{title}' to catalog!", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error adding book: {str(e)}", "danger")
+    finally:
+        cur.close()
+        conn.close()
+    
+    return redirect(url_for('librarian_view'))
+
+
+@app.route("/remove_books", methods=["POST"])
+def remove_books():
+    """Remove selected books from the catalog."""
+    if session.get('role') != 'librarian':
+        flash("Must be a librarian to remove books", "warning")
+        return redirect(url_for('catalog'))
+    
+    selected_isbns = request.form.getlist("selected_isbn")
+    
+    if not selected_isbns:
+        flash("No books selected for removal", "warning")
+        return redirect(url_for('librarian_view'))
+    
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        for isbn in selected_isbns:
+            cur.execute("""
+                UPDATE status 
+                SET removed = CURRENT_DATE 
+                WHERE isbn = %s AND removed IS NULL
+            """, (isbn,))
+            
+            cur.execute("DELETE FROM checkedOut WHERE isbn = %s", (isbn,))
+            
+            cur.execute("DELETE FROM status WHERE isbn = %s", (isbn,))
+            
+            cur.execute("DELETE FROM book WHERE isbn = %s", (isbn,))
+        
+        conn.commit()
+        flash(f"Successfully removed {len(selected_isbns)} book(s) from catalog!", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error removing books: {str(e)}", "danger")
+    finally:
+        cur.close()
+        conn.close()
+    
+    return redirect(url_for('librarian_view'))
+
 
 @app.route("/librarian_view")
 def librarian_view():
@@ -306,7 +389,8 @@ def librarian_view():
         """)
         books = cur.fetchall()
     finally:
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
     
     rows_html = render_catalog_rows(books, reader_mode=False)
     base_html = read_static_html("librarian_view.html")
