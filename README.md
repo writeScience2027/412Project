@@ -20,59 +20,64 @@ Together, they form a fully functional database that models a library’s users,
 
 ---
 
-## Setup Instructions
+## Database Setup Instructions
 
-### Clone the Repository
-``git clone https://github.com/<your-username>/<your-repo-name>.git``
+### 1. Clone the Repository
+```bash
+git clone https://github.com/writeScience2027/412Project.git
+cd 412Project
+```
 
-``cd <your-repo-name>``
+### 2. Install PostgreSQL
 
-### Start PostgreSQL
+Download and install PostgreSQL from [postgresql.org](https://www.postgresql.org/download/)
 
-If running locally:
+### 3. Create Python Virtual Environment
 
-``export PATH="/opt/homebrew/opt/postgresql@15/bin:${PATH}"``
+**Windows (PowerShell):**
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-``export PGPORT=8888``
+**Mac/Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-``export PGHOST=/tmp``
+### 4. Install Python Dependencies
+```bash
+pip install flask psycopg2-binary python-dotenv
+```
 
-``pg_ctl -D $HOME/db412 -o '-k /tmp' start``
+### 5. Configure Database Connection
 
-### Create a New Database
+Create a `.env` file in the project root:
+```env
+PGDATABASE=CSE412Project
+PGUSER=postgres
+PGPASSWORD=your_postgres_password (Replace with your actual PostgreSQL password)
+PGHOST=localhost
+PGPORT=5432
+```
 
-Only do this once:
+### 6. Initialize the Database
 
-``createdb CSE412Project``
+```bash
+# Create database
+psql -U postgres -c "CREATE DATABASE CSE412Project;"
 
-### Connect to the Database
-``psql -d CSE412Project``
+# Load schema
+psql -U postgres -d CSE412Project -f schema.sql
 
-### Run the Schema and Data Scripts
+# Load sample data
+psql -U postgres -d CSE412Project -f data.sql
+```
 
-Inside the PostgreSQL console:
+### 7. Run the Application
+```bash
+python app.py
+```
 
-``\i schema.sql``
-
-``\i data.sql``
-
-
-You can verify successful setup by listing tables:
-
-``\dt``
-
-### Run Queries
-
-To demonstrate functionality, run:
-
-``\i queries.sql``
-
-Example queries include:
-
- - Listing all overdue books and who borrowed them
-
- - Viewing all books available by genre or audience age
-
- - Checking the total number of books a reader currently has checked out
-
- - Updating a record when a reader returns a book
+The application will start on `http://localhost:5000`
