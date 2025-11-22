@@ -91,7 +91,7 @@ def render_catalog_rows(book_rows, reader_mode=True):
     return "\n".join(out)
 
 def render_loans_rows(loan_rows):
-    """Generate table rows matching reader_profile.html structure (7 columns)."""
+    """Generate table rows matching reader_profile.html structure."""
     out = []
     for l in loan_rows:
         isbn = l.get("isbn")
@@ -101,13 +101,19 @@ def render_loans_rows(loan_rows):
         duedate = l.get("duedate") or l.get("dueDate") or ""
         isoverdue = l.get("isoverdue") or l.get("isOverdue") or False
         overdue_str = "Yes" if isoverdue else "No"
-        returndate = l.get("returndate") or l.get("returnDate") or "N/A"
+        returndate = l.get("returndate") or l.get("returnDate")
+        
+        if not returndate:
+            checkbox = f"<input type='checkbox' name='selected_isbn' value='{isbn}'>"
+        else:
+            checkbox = "Returned"
         
         tr = (
             f"<tr>"
+            f"<td>{checkbox}</td>"
             f"<td>{title}</td><td>{author}</td><td>{isbn}</td>"
             f"<td>{borrowdate}</td><td>{duedate}</td>"
-            f"<td>{overdue_str}</td><td>{returndate}</td>"
+            f"<td>{overdue_str}</td>"
             f"</tr>"
         )
         out.append(tr)
