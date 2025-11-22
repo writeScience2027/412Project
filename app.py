@@ -283,28 +283,10 @@ def librarian_profile():
         return redirect(url_for('catalog'))
     
     user = session.get("userID")
-    conn = get_db_conn()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    try:
-        cur.execute("""
-            SELECT b.isbn, b.title, b.author, 
-                   CURRENT_DATE AS borrowdate, 
-                   CURRENT_DATE AS duedate,
-                   FALSE AS isoverdue,
-                   NULL AS returndate
-            FROM book b
-            LIMIT 10
-        """)
-        books = cur.fetchall()
-    finally:
-        cur.close(); conn.close()
-    
     base_html = read_static_html("librarian_profile.html")
     base_html = base_html.replace("ex: userId", user)
     
-    rows_html = render_loans_rows(books)
-    new_html = inject_rows_into_table(base_html, rows_html, table_index=0)
-    return Response(new_html, mimetype="text/html")
+    return Response(base_html, mimetype="text/html")
 
 
 @app.route("/librarian_view")
