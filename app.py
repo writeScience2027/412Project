@@ -107,6 +107,43 @@ def render_loans_rows(loan_rows):
         out.append(tr)
     return "\n".join(out)
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        userid = request.form.get("userid")
+        password = request.form.get("password")
+        
+        if not userid or not password:
+            flash("Please enter both UserID and Password", "warning")
+            return redirect(url_for("login"))
+        
+        conn = get_db_conn()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cur.execute("SELECT userID, password FROM users WHERE userID = %s", (userid,))
+            user = cur.fetchone()
+            
+            if user and user['password'] == password:
+                session['userID'] = userid
+                
+                cur.execute("SELECT 1 FROM librarian WHERE userID = %s", (userid,))
+                if cur.fetchone():
+                    session['role'] = 'librarian'
+                    flash(f"Welcome, {userid}!", "success")
+                    return redirect(url_for('cataloglibrarian'))
+                else:
+                    session['role'] = 'reader'
+                    flash(f"Welcome, {userid}!", "success")
+                    return redirect(url_for('catalog'))
+            else:
+                flash("Invalid UserID or Password", "danger")
+                return redirect(url_for("login"))
+        finally:
+            cur.close()
+            conn.close()
+    
+    return send_from_directory(STATIC_HTML_DIR, 'index.html')
+
 @app.route("/setuser/<userid>")
 def set_user(userid):
     """Quick demo helper to set session user (no password)."""
