@@ -165,8 +165,7 @@ def set_user(userid):
 
 @app.route("/")
 def index():
-    """Serve the login page."""
-    return send_from_directory(STATIC_HTML_DIR, 'index.html')
+    return redirect(url_for('login'))
 
 @app.route("/catalog")
 def catalog():
