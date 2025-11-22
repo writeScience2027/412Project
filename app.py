@@ -351,6 +351,53 @@ def reader_profile():
     new_html = inject_rows_into_table(base_html, rows_html, table_index=0)
     return Response(new_html, mimetype="text/html")
 
+@app.route("/return_books", methods=["POST"])
+def return_books():
+    """Return selected books for a reader."""
+    user = session.get("userID")
+    if not user or session.get('role') != 'reader':
+        flash("Must be logged in as a reader to return books", "warning")
+        return redirect(url_for('catalog'))
+    
+    selected_isbns = request.form.getlist("selected_isbn")
+    
+    if not selected_isbns:
+        flash("No books selected for return", "warning")
+        return redirect(url_for('reader_profile'))
+    
+    conn = get_db_conn()
+    cur = conn.cursor()
+    try:
+        for isbn in selected_isbns:
+            cur.execute("""
+                UPDATE checkedOut
+                SET returnDate = CURRENT_DATE, isOverdue = FALSE
+                WHERE userID = %s AND isbn = %s AND returnDate IS NULL
+            """, (user, isbn))
+            
+            cur.execute("""
+                UPDATE book 
+                SET numAvailable = numAvailable + 1 
+                WHERE isbn = %s
+            """, (isbn,))
+            
+            cur.execute("""
+                UPDATE reader 
+                SET numBooksCheckedOut = GREATEST(numBooksCheckedOut - 1, 0) 
+                WHERE userID = %s
+            """, (user,))
+        
+        conn.commit()
+        flash(f"Successfully returned {len(selected_isbns)} book(s)!", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error returning books: {str(e)}", "danger")
+    finally:
+        cur.close()
+        conn.close()
+    
+    return redirect(url_for('reader_profile'))
+
 
 @app.route("/librarian_profile")
 def librarian_profile():
