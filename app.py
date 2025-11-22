@@ -67,8 +67,14 @@ def render_catalog_rows(book_rows, reader_mode=True):
         totalq = b.get("totalquantity") if b.get("totalquantity") is not None else b.get("totalQuantity", "")
         
         if reader_mode:
+            if numavailable and int(numavailable) > 0:
+                checkbox = f"<input type='checkbox' name='selected_isbn' value='{isbn}'>"
+            else:
+                checkbox = "<span style='color: red;'>Unavailable</span>"
+            
             tr = (
                 f"<tr>"
+                f"<td>{checkbox}</td>"
                 f"<td>{title}</td><td>{author}</td><td>{isbn}</td><td>{genre}</td>"
                 f"<td>{audience}</td><td>{year}</td><td>{numavailable}</td><td>{totalq}</td>"
                 f"</tr>"
