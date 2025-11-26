@@ -212,17 +212,26 @@ def catalog():
 
 @app.route("/checkout_books", methods=["POST"])
 def checkout_books():
-    """Checkout selected books for a reader."""
     user = session.get("userID")
+    print(f"\n=== CHECKOUT DEBUG ===")
+    print(f"User: {user}")
+    print(f"Role: {session.get('role')}")
+    print(f"Form data: {dict(request.form)}")
+    print(f"Selected ISBNs: {request.form.getlist('selected_isbn')}")
+    
     if not user or session.get('role') != 'reader':
+        print("FAILED: Not a reader or not logged in")
         flash("Must be logged in as a reader to checkout books", "warning")
         return redirect(url_for('catalog'))
     
     selected_isbns = request.form.getlist("selected_isbn")
     
     if not selected_isbns:
+        print("FAILED: No ISBNs selected")
         flash("No books selected for checkout", "warning")
         return redirect(url_for('catalog'))
+    
+    print(f"Processing {len(selected_isbns)} books...")
     
     conn = get_db_conn()
     cur = conn.cursor()
@@ -230,36 +239,45 @@ def checkout_books():
     error_books = []
     
     try:
-        for isbn in selected_isbns:
+        for isbn_str in selected_isbns:
+            isbn = int(isbn_str)  # Convert string to integer
+            print(f"  Checking out ISBN: {isbn}")
             try:
                 cur.execute("SELECT numAvailable, title FROM book WHERE isbn = %s", (isbn,))
                 result = cur.fetchone()
+                print(f"    Book found: {result}")
                 
-                if result and result[0] > 0:
+                if result and result['numavailable'] > 0:  # Use dict key
                     cur.execute("""
                         INSERT INTO checkedOut (userID, isbn, borrowDate, dueDate, returnDate, isOverdue)
                         VALUES (%s, %s, CURRENT_DATE, (CURRENT_DATE + INTERVAL '30 days')::date, NULL, FALSE)
                     """, (user, isbn))
+                    print(f"    ✓ Inserted checkout record")
                     
                     cur.execute("""
                         UPDATE book 
                         SET numAvailable = GREATEST(numAvailable - 1, 0) 
                         WHERE isbn = %s
                     """, (isbn,))
+                    print(f"    ✓ Updated availability")
                     
                     cur.execute("""
                         UPDATE reader 
                         SET numBooksCheckedOut = numBooksCheckedOut + 1 
                         WHERE userID = %s
                     """, (user,))
+                    print(f"    ✓ Updated reader count")
                     
                     success_count += 1
                 else:
-                    error_books.append(result[1] if result else f"ISBN {isbn}")
+                    print(f"    ✗ Book unavailable or not found")
+                    error_books.append(result['title'] if result else f"ISBN {isbn}")
             except Exception as e:
+                print(f"    ✗ Error: {e}")
                 error_books.append(f"ISBN {isbn}")
         
         conn.commit()
+        print(f"Transaction committed. Success: {success_count}, Errors: {len(error_books)}")
         
         if success_count > 0:
             flash(f"Successfully checked out {success_count} book(s)!", "success")
@@ -268,13 +286,14 @@ def checkout_books():
             
     except Exception as e:
         conn.rollback()
+        print(f"ROLLBACK: {e}")
         flash(f"Error during checkout: {str(e)}", "danger")
     finally:
         cur.close()
         conn.close()
     
+    print("=== END CHECKOUT ===\n")
     return redirect(url_for('catalog'))
-
 
 @app.route("/cataloglibrarian")
 def cataloglibrarian():
@@ -368,7 +387,9 @@ def return_books():
     conn = get_db_conn()
     cur = conn.cursor()
     try:
-        for isbn in selected_isbns:
+        for isbn_str in selected_isbns:
+            isbn = int(isbn_str)  # Convert string to integer
+            
             cur.execute("""
                 UPDATE checkedOut
                 SET returnDate = CURRENT_DATE, isOverdue = FALSE
@@ -397,7 +418,6 @@ def return_books():
         conn.close()
     
     return redirect(url_for('reader_profile'))
-
 
 @app.route("/librarian_profile")
 def librarian_profile():
@@ -471,7 +491,9 @@ def remove_books():
     conn = get_db_conn()
     cur = conn.cursor()
     try:
-        for isbn in selected_isbns:
+        for isbn_str in selected_isbns:
+            isbn = int(isbn_str)  # Convert string to integer
+            
             cur.execute("""
                 UPDATE status 
                 SET removed = CURRENT_DATE 
@@ -494,7 +516,6 @@ def remove_books():
         conn.close()
     
     return redirect(url_for('librarian_view'))
-
 
 @app.route("/librarian_view")
 def librarian_view():
