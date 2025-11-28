@@ -1,6 +1,6 @@
 @import url(https://https://fonts.google.com/specimen/Lora.google.com/specimen/Playfair+Display/license);
 *{
-    background-color: #d3bbf3;
+    background-color: #ede0d4;
     margin: 0; 
     padding: 0;
     box-sizing : border-box;
@@ -116,7 +116,7 @@ table,td{
     margin: 10px;
 }
 .reader-info{
-    background-color: #100e4d;
+    background-color: #b08968;
     justify-content: center;
     padding: 20px;
     margin: 30px auto;
