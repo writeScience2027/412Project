@@ -8,7 +8,7 @@
 }
 
 .navbar, .find{
-    background-color: #100e4d;
+    background-color: #b08968;
 
     display: flex;
     
@@ -21,7 +21,7 @@
     font-family: 'Lora', 'Times New Roman';
 }
 .navbar a, .find a, .checkout a, .catalogEdit a{
-    background-color: #100e4d;
+    background-color: #b08968;
 
     float:left;
     padding: 14px;
@@ -31,8 +31,8 @@
     text-align: center;
 }
 .navbar a:hover, .find a:hover, .checkout a:hover, .catalogEdit a:hover{
-    background-color: #ac8cd6;
-    color: #100e4d; 
+    background-color: #ede0d4;
+    color: #b08968; 
 }
 .navbar a.active, .find a.active, .checkout a.active{
     cursor: pointer;
@@ -59,7 +59,7 @@
 }
 
 .logout {
-    background-color: #100e4d;
+    background-color: #b08968;
 
     margin-left: auto;
 
