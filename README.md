@@ -66,6 +66,9 @@ EOF
 
 ### 6. Initialize the Database
 
+> [!NOTE]
+> If on a Mac and have brew installed, run `brew services start postgresql@15` before running the following commands. It ensures that they are successful.
+
 ```bash
 # Create database
 psql -U postgres -c "CREATE DATABASE CSE412Project;"
