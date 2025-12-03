@@ -55,11 +55,13 @@ pip install flask psycopg2-binary python-dotenv
 
 Create a `.env` file in the project root:
 ```env
-PGDATABASE=CSE412Project
-PGUSER=postgres
+cat > .env << 'EOF'
+PGDATABASE=CSE412Project (Mac is case sensitive, so do cse412project)
+PGUSER=postgres (Replace with your PostgreSQL username)
 PGPASSWORD=your_postgres_password (Replace with your actual PostgreSQL password)
 PGHOST=localhost
 PGPORT=5432
+EOF
 ```
 
 ### 6. Initialize the Database
